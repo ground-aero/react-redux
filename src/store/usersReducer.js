@@ -3,7 +3,7 @@ const defaultState = {
     users: [], // массив игроков
 }
 
-// payload:
+// payload: {id: 1, name: "name"}}
 
 export const usersReducer = (state = defaultState, action) => {
     switch (action.type) {
