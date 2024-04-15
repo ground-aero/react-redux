@@ -1,9 +1,13 @@
-import logo from './logo.svg';
-import './App.css';
-import {useDispatch, useSelector} from "react-redux";
+import React from 'react'
+import './App.css'
+import {useDispatch, useSelector} from "react-redux"
+import { addUserAction, removeUserAction } from './store/usersReducer';
+import { addCashAction, getCashAction } from './store/cashReducer';
 
 function App() {
   const dispatch = useDispatch()
+  const [isUserName, setUserName] = React.useState('');
+
   const cash = useSelector(state => state.cashReducer.cash) // 'cash' - это cashReducer, затем переменная 'cash' получаемая из состояния
     console.log(cash)
 
@@ -11,27 +15,39 @@ function App() {
   console.log(users)
 
 // cash. 
-    const addCash = (cash) => { // в dispatch прокидываем action {type='',paylod='?'}, и state изменяется 
+    const addCash = (cash) => { // в dispatch прокидываем action {type='', paylod='?'}, и state изменяется 
       if (!isNaN(cash) && cash !== 0) {
-        dispatch({type: 'ADD_CASH', payload: cash})      
+        dispatch(addCashAction(cash))      
       }
     }
 
     const getCash = (cash) => {
-      dispatch({type: 'GET_CASH', payload: cash})
+      dispatch(getCashAction(cash))
     }
 
-// users
+// users.
+
+    /** Обработчик изменения инпута обновляет стейт */
+    function handleChangeUserName (e) {
+      setUserName(e.target.value)
+    }
+
+    function handleSubmitUser(e) {
+      e.preventDefault();// Запрещаем браузеру переходить по адресу формы
+      addUser(isUserName);
+      setUserName('');
+    }
+
     const addUser = (name) => {
       const user = {
-          name,
-          id: Date.now()
+        id: Math.random(),
+        name: name,
       }
-      dispatch({ type: 'ADD_USER', payload: user })
+      dispatch(addUserAction(user))
     }
 
     const removeUser = (users) => {
-      dispatch({type: 'REMOVE_USER', payload: users.id})
+      dispatch(removeUserAction(users.id))
     }
 
   return (
@@ -41,37 +57,42 @@ function App() {
         </header>
 
 {/* view */}
-          {/* cash */}
-          <div style={{fontSize: '2rem', marginTop: '100px'}}>
-              {cash}
-          </div>
-          <div style={{display: 'flex', justifyContent: 'center', marginTop: '30px'}}>
-              <button onClick={() => addCash(Number(prompt()))}>Добавить средства</button>
-              <button onClick={() => getCash(Number(prompt()))}>Снять средства</button>
-          </div>
+        {/* cash ---------------------------------------------------------------*/}
+        <div style={{fontSize: '2rem', marginTop: '100px'}}>
+            {cash}
+        </div>
+        <div style={{display: 'flex', justifyContent: 'center', marginTop: '30px'}}>
+            <button onClick={() => addCash(Number(prompt()))}>Добавить средства</button>
+            <button onClick={() => getCash(Number(prompt()))}>Снять средства</button>
+        </div>
 
-          {/* users:[] */}
-          <div style={{fontSize: '2rem', marginTop: '100px'}}>
-          <p style={{fontSize: '2rem', fontWeight: 'bold', color: 'darkgreen', marginBottom: '10px', textDecoration: "underline"}}>
-              Users:
+        {/* users:[] ---------------------------------------------------------------*/}
+        <div className="users_view">
+          <p className="users_header">
+              Пользователи:
           </p>
-              {/*{users.map((user, _ind) => <div key='_ind'>{user.name}</div>)}*/}
-              {users.length > 0 ?
-                  <div>
-                      {users.map((user, _ind) =>
-                          <div key={_ind} style={{border: '1px solid gray', display: 'flex', justifyContent: 'space-between', paddingLeft: '60px'}}>
-                              {user.name}
-                              <button onClick={() => removeUser(user)} style={{justifySelf: 'stretch'}}>Удалить игрока</button>
-                          </div>
-                      )}
-                  </div>
-                  :
-                  <div>Пользователи отсутствуют</div>}
-          </div>
 
-          <div style={{display: 'block', justifyContent: 'center', marginTop: '30px'}}>
-               <button onClick={() => addUser(prompt())} style={{padding: '15px'}}>Добавить пользователя</button>
-          </div>
+          {users.length > 0 ?
+            <>
+              {users.map((user, _ind) =>
+                        <div key={_ind} className="username_view">
+                            {user.name}
+                            <button onClick={() => removeUser(user)} className="btn_del">Удалить</button>
+                        </div>
+                  )}
+            </>
+            :
+              <div>Пользователи отсутствуют</div>}
+        </div>
+
+        <form onSubmit={handleSubmitUser} action="#" className="form">
+          <label htmlFor="name">Name (2 to 25 characters):</label>
+          <input value={isUserName} onChange={handleChangeUserName} type="text" id="name" name="name" required minLength="2" maxLength="25" size="10"
+            className="input_style"/>
+
+          <button type="submit" className="btn_add">Добавить пользователя</button>
+        </form>
+              
 
       </div>
   );
